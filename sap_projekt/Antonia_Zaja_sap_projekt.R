@@ -83,59 +83,111 @@ data %>% group_by(BedroomAbvGr) %>% summarise(
 ) -> summary
 summary
 
-data_bed0<- data[data$BedroomAbvGr == c("0"),]
-hist(data_bed0$SalePrice)
-qqnorm(data_bed0$SalePrice, main="0")
-qqline(data_bed0$SalePrice, col="blue")
+#Ovisi li velicina podruma o kvartu u gradu?
+blmngtn = which(data$Neighborhood=='Blmngtn')/1460*100
+blueste = which(data$Neighborhood=='Blueste')/1460*100
+brdale = which(data$Neighborhood=='BrDale')/1460*100
+brkside = which(data$Neighborhood=='BrkSide')/1460*100
+clearcr = which(data$Neighborhood=='ClearCr')/1460*100
+collgcr = which(data$Neighborhood=='CollgCr')/1460*100
+crawfor = which(data$Neighborhood=='Crawfor')/1460*100
+edwards = which(data$Neighborhood=='Edwards')/1460*100
+gilbert = which(data$Neighborhood=='Gilbert')/1460*100
+IDOTRR = which(data$Neighborhood=='IDOTRR')/1460*100
+returnsComplete = data[complete.cases(data[,c("TotalBsmtSF",
+                                                "Neighborhood")]),]
+blm = data[data$Neighborhood == "Blmngtn",]
+blues = data[data$Neighborhood == "Blueste",]
+brdalee = data[data$Neighborhood == "BrDale",]
+brsk = data[data$Neighborhood == "BrkSide",]
+clear = data[data$Neighborhood == "ClearCr",]
+coll = data[data$Neighborhood == "CollgCr",]
+craw = data[data$Neighborhood == "Crawfor",]
+edw = data[data$Neighborhood == "Edwards",]
+gil = data[data$Neighborhood == "Gilbert",]
+idd = data[data$Neighborhood == "IDOTRR",]
 
-data_bed1<- data[data$BedroomAbvGr == c("1"),]
-hist(data_bed1$SalePrice)
-qqnorm(data_bed1$SalePrice, main="1")
-qqline(data_bed1$SalePrice, col="blue")
+boxplot(blm$TotalBsmtSF,
+        blues$TotalBsmtSF,
+        brdalee$TotalBsmtSF,brsk$TotalBsmtSF ,clear$TotalBsmtSF,
+        coll$TotalBsmtSF,craw$TotalBsmtSF,edw$TotalBsmtSF,
+        gil$TotalBsmtSF,idd$TotalBsmtSF,names=c("Blmngtn", "Blueste", "BrDale",
+                                                "BrkSide", "ClearCr", "CollgCr", "Crawfor",
+                                                "Edwards", "Gilbert", "IDOTRR"), col=rainbow(3))
 
-data_bed2<- data[data$BedroomAbvGr == c("2"),]
-hist(data_bed2$SalePrice)
-qqnorm(data_bed2$SalePrice, main="2")
-qqline(data_bed2$SalePrice, col="blue")
+#Pravokutni dijagram  ukazuje na veliku zakrivljenost u podacima 
+#Zbog te činjenice ne možemo analizu varijance koja se oslanja na pretpostavku normalnosti
+#svih uzoraka. Za analizu jednakosti sredina koristit ćemo Kruskal-Wallisov test umjesto ANOVA testa.
 
-data_bed3<- data[data$BedroomAbvGr == c("3"),]
-hist(data_bed3$SalePrice)
-qqnorm(data_bed3$SalePrice, main="3")
-qqline(data_bed3$SalePrice, col="blue")
+kruskal.test(data$TotalBsmtSF~data$Neighborhood, data=data);
+#jedan od kvartova ima razlicitu velicinu podruma?
+shapiro.test(blm$TotalBsmtSF)
+#shapiro.test(blues$TotalBsmtSF)
+shapiro.test(brdalee$TotalBsmtSF)
+shapiro.test(brsk$TotalBsmtSF)
+shapiro.test(clear$TotalBsmtSF)
+shapiro.test(coll$TotalBsmtSF)
+shapiro.test(craw$TotalBsmtSF)
+shapiro.test(edw$TotalBsmtSF)
+shapiro.test(gil$TotalBsmtSF)
+shapiro.test(idd$TotalBsmtSF)
 
-data_bed4<- data[data$BedroomAbvGr == c("4"),]
-hist(data_bed4$SalePrice)
-qqnorm(data_bed4$SalePrice, main="4")
-qqline(data_bed4$SalePrice, col="blue")
+wilcox.test(idd$TotalBsmtSF,blm$TotalBsmtSF , paired = FALSE,
+            var.equal = FALSE, alternative = "greater")
+#velcina podruma o kvartu
 
-data_bed5<- data[data$BedroomAbvGr == c("5"),]
-hist(data_bed5$SalePrice)
-qqnorm(data_bed5$SalePrice, main="5")
-qqline(data_bed5$SalePrice, col="blue")
+blmngtn = which(data$Neighborhood=='Blmngtn')
+blueste = which(data$Neighborhood=='Blueste')
+brdale = which(data$Neighborhood=='BrDale')
+brkside = which(data$Neighborhood=='BrkSide')
+clearcr = which(data$Neighborhood=='ClearCr')
+collgcr = which(data$Neighborhood=='CollgCr')
+crawfor = which(data$Neighborhood=='Crawfor')
+edwards = which(data$Neighborhood=='Edwards')
+gilbert = which(data$Neighborhood=='Gilbert')
+IDOTRR = which(data$Neighborhood=='IDOTRR')
+kvart = c(sum(blmngtn),sum(blueste),sum(brdale),sum(brkside),sum(clearcr),
+         sum(collgcr),sum(crawfor),sum(edwards),sum(gilbert),sum(IDOTRR))
+velicina_podruma = data$TotalBsmtSF
+sum(is.na(data$Neighborhood))
+model = lm(kvart~velicina_podruma)
+plot(velicina_podruma, kvart, xlab="vel podruma",
+     ylab="kvart")
+abline(model, col="red")
+summary(model)
+qqnorm(rstandard(model))
+qqline(rstandard(model))
 
-data_bed6<- data[data$BedroomAbvGr == c("6"),]
-hist(data_bed6$SalePrice)
-qqnorm(data_bed6$SalePrice, main="6")
-qqline(data_bed6$SalePrice, col="blue")
+plot(fitted(model), resid(model))
+abline(0,0, col="red")
+c("Pearsonov koeficijent korelacije:", cor(velicina_podruma,kvart,method="pearson"))
 
-data_bed7<- data[data$BedroomAbvGr == c("7"),]
-hist(data_bed7$SalePrice)
-qqnorm(data_bed7$SalePrice, main="7")
-qqline(data_bed7$SalePrice, col="blue")
 
-data_bed8<- data[data$BedroomAbvGr == c("8"),]
-hist(mean(data_bed8$SalePrice))
-qqnorm(mean(data_bed8$SalePrice), main="8")
-qqline(mean(data_bed8$SalePrice), col="blue")
+#ovisnost broja spavacih soba o cijeni
+cijena = data$SalePrice/data$GrLivArea
+broj_soba = data$BedroomAbvGr
+sum(is.na(data$Neighborhood))
+model = lm(cijena~broj_soba)
+plot(broj_soba, cijena, xlab="vel podruma",
+     ylab="kvart")
+abline(model, col="red")
+summary(model)
+qqnorm(rstandard(model))
+qqline(rstandard(model))
 
-data_b0 <- na.omit(data_bed0$SalePrice)
-data_b1 <- na.omit(data_bed1$SalePrice)
-data_b2 <- na.omit(data_bed2$SalePrice)
-data_b8 <- na.omit(mean(data_bed8$SalePrice))
-var(data_b0)
-var(data_b1)
-var(data_b2)
-var(data_b8)
+plot(fitted(model), resid(model))
+abline(0,0, col="red")
+c("Pearsonov koeficijent korelacije:", cor(broj_soba,cijena,method="pearson"))
+
+
+
+
+
+
+
+
+
+
 
 
 
