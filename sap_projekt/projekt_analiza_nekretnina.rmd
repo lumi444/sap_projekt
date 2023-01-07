@@ -3,6 +3,9 @@ title: "Analiza tržišta nekretnina"
 author: 'SAP projekt: Marko Dodik, Silvija Gojević, Lucija Mičić, Antonia Žaja'
 date: "19.12.2022."
 output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -21,18 +24,22 @@ jezik R koji je pružio potporu za izvođenje testiranja i bolju
 vizualizaciju podataka.
 
 ## Opis problema:
- 
-Cilj projektnog zadatka je analizirati podatke o prodanim nekretninama i analizirati uspješnost prodaje nekretnina ovisno o značajkama koje nekretnina sadrži.
-## Skup podataka:
 
-Analizu uspješnosti prodaje nekretnina provodimo nad skupom podataka koji se odnosi na prodane nekretnine u sljedećim godinama: 2006.,2007.,2008.,2009.,2010. Skup podataka sastoji se od značajki, koje opisuju detalje prodane nekretnine, a izražene su u integer i charachter tipu podataka.
-## Deskriptivna statistika skupa podataka:
+Cilj projektnog zadatka je analizirati podatke o prodanim nekretninama i
+analizirati uspješnost prodaje nekretnina ovisno o značajkama koje
+nekretnina sadrži. \## Skup podataka:
+
+Analizu uspješnosti prodaje nekretnina provodimo nad skupom podataka
+koji se odnosi na prodane nekretnine u sljedećim godinama:
+2006.,2007.,2008.,2009.,2010. Skup podataka sastoji se od značajki, koje
+opisuju detalje prodane nekretnine, a izražene su u integer i charachter
+tipu podataka. \## Deskriptivna statistika skupa podataka:
 
 ```{r, echo=FALSE,message=FALSE}
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
-data=read.csv('C://Users/Franjo/OneDrive/Dokumenti/SAP/preprocessed_data.csv')
+data=read.csv('preprocessed_data.csv')
 
 ```
 
@@ -96,8 +103,16 @@ barplot(table(data$Neighborhood),las=2,cex.names=.5,main='Neighborhood of houses
 
 
 ```
-
+Nadalje, mogli bi se zapitati koja je prosječna cijena kvadrata po kvartu, kako bi dobili bolji uvid u poželjnije kvartove za život.
 \pagebreak
+```{r}
+data$PricePerSqFt <- data$SalePrice / data$GrLivArea
+data_by_neighborhood <- data %>% group_by(Neighborhood) %>% 
+  summarize(MeanPricePerSqFt = mean(PricePerSqFt))
+
+ggplot(data_by_neighborhood, aes(x = Neighborhood, y = MeanPricePerSqFt)) + geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90))
+
+```
 
 # Statističko zaključivanje
 
@@ -106,25 +121,29 @@ barplot(table(data$Neighborhood),las=2,cex.names=.5,main='Neighborhood of houses
 Svaka nekretnina ima određeni oblik (IR1,IR2,IR3,Reg). Zanima nas
 razlikuju li se broj katova nekretnine s obzirom na oblik nekretnine,
 odnosno želimo provjeriti imaju li nekretnine s određenog oblika veći
-broj katova nego ostale. Za početak želimo vidjeti ravnaju li se broj
-katova nekretnine po normalnoj razdiobi kako bi mogli primijeniti
-analizu varijance.
+broj katova nego ostale. Postroji li veza koja bi objasnila ovisnost tih
+dviju atributa, provodimo hi-kvadrat test. Testom utvrđujemo
+p-vrijednost, koje je manja od 0.05, stoga zaključujemo za broj katova
+nekretnine ne ovisi o obliku čestice.
 
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-v1 = table(data[data$LotShape == "IR1" | data$LotShape == "IR2" | data$LotShape == "IR3"| data$LotShape == "Reg",]$LotShape, 
-            data[data$LotShape == "IR1" | data$LotShape == "IR2" | data$LotShape == "IR3"| data$LotShape == "Reg",]$HouseStyle=='1Story')
-v2= table(data[data$LotShape == "IR1" | data$LotShape == "IR2" | data$LotShape == "IR3"| data$LotShape == "Reg",]$LotShape, 
-            data[data$LotShape == "IR1" | data$LotShape == "IR2" | data$LotShape == "IR3"| data$LotShape == "Reg",]$HouseStyle=='2Story')
+tableHSLS <- table(data$HouseStyle, data$LotShape)
+chi_squared_test <- chisq.test(tableHSLS)
+chi_squared_test
 
-values1=c(v1[1,2],v1[2,2],v1[3,2],v1[4,2])
-values2=c(v2[1,2],v2[2,2],v2[3,2],v2[4,2])
-v1
-v2
+colors <- c("red", "blue", "green", "orange")
 
+mosaicplot(tableHSLS,
+           col=colors,
+           xlab="House Style", ylab = "Lot Shape" ,main = "House Style by Shape of Lot")
 
 ```
 
 ## Ovisnost cijene kvadrata nekretnine o broju spavaćih soba:
+Za utvrđivanje postoji li ovisnost između cijene kvadrata i broja spavaćih soba provest ćemo ANOVA test. ANOVA (analiza varijance) je statistički test koji se koristi za usporedbu srednjih vrijednosti više od dvije grupe. Često je dobro rješenje kada želimo utvrditi postoji li značajna razlika između srednjih vrijednosti više od dvije grupe, jer nam omogućuje testiranje više grupa odjednom.
+U kontekstu zadanog skupa podataka, ANOVA je dobro rješenje jer želimo usporediti srednje vrijednosti cijene po kvadratnom metru za kuće s različitim brojem spavaćih soba. 
+P-vrijednost za ovaj test iznosi zanemarivih <2e-16, što nam govori da postoji značajna razlika
+između srednjih vrijednosti grupa.
 
 ```{r}
 data_room0 <- data[data$BedroomAbvGr == c("0"),]
@@ -190,24 +209,24 @@ var(na.omit(mean(data_room5$SalePrice/data_room5$GrLivArea)))
 var(na.omit(mean(data_room6$SalePrice/data_room6$GrLivArea)))
 var(na.omit(mean(data_room8$SalePrice/data_room8$GrLivArea)))
 
-res.aov <- aov( SalePrice/GrLivArea~ factor(BedroomAbvGr), data = data)
+res.aov <- aov( SalePrice/GrLivArea~ BedroomAbvGr, data = data)
 summary(res.aov)
 
-data_by_bedrom<- data %>%
+data_by_bedrooms <- data %>%
   group_by(BedroomAbvGr)%>%
-  summarize(mean_price_sqrt =mean(SalePrice/GrLivArea),
-            sd_price_sqrt=sd(SalePrice/GrLivArea))
-
-res1.aov <- aov( SalePrice/GrLivArea~ factor(BedroomAbvGr), data = data)
-summary(res1.aov)
-  
+  summarize(mean_price_sqft =mean(SalePrice/GrLivArea),
+            sd_price_sqft=sd(SalePrice/GrLivArea))
+ ggplot(data = data_by_bedrooms, aes(x = BedroomAbvGr, y = mean_price_sqft)) + geom_bar(stat = "identity")
 ```
-ZAKLJUCAK: odbacujemo nultu hipotezu
-\pagebreak
+
+ZAKLJUCAK: odbacujemo nultu hipotezu \pagebreak
 
 ## Ovisi li velicina podruma o kvartu u gradu:
 
-Svaka prodana nekretnina nalazi se u određenom naselju i ima određenu veličinu podruma. Zanima nas razlikuju li se uspješnosti prodaje nekretnina u određenom naselju s obzirom na veličinu podruma. 
+Svaka prodana nekretnina nalazi se u određenom naselju i ima određenu
+veličinu podruma. Zanima nas razlikuju li se uspješnosti prodaje
+nekretnina u određenom naselju s obzirom na veličinu podruma.
+
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
 data_by_neighborhood <- data %>% group_by(data$Neighborhood) %>%
 print(data_by_neighborhood)
@@ -394,9 +413,13 @@ qqnorm(data_re25$TotalBsmtSF, main="Velicina podruma u Veenker")
 qqline(data_re25$TotalBsmtS, col="blue")
 
 ```
-Pretpostavke ANOVA testa su: populacije iz grupa međusobno su nezavisne i normalno distribuirane sa jednakim varijancama. Nezavisnost populacija teško možemo provjeriti stoga ćemo pretpostaviti da su one nezavisne.
+
+Pretpostavke ANOVA testa su: populacije iz grupa međusobno su nezavisne
+i normalno distribuirane sa jednakim varijancama. Nezavisnost populacija
+teško možemo provjeriti stoga ćemo pretpostaviti da su one nezavisne.
 
 U nastavku vidimo da se varijance populacija razlikuju.
+
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
 var(na.omit(data_re1$TotalBsmtSF))
 var(na.omit(data_re2$TotalBsmtSF))
@@ -422,7 +445,9 @@ var(na.omit(data_re21$TotalBsmtSF))
 var(na.omit(data_re22$TotalBsmtSF))
 var(na.omit(data_re23$TotalBsmtSF))
 ```
+
 U nastavku je prikazan pravokutni dijagram za sve grupe.
+
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
 boxplot(data$TotalBsmtSF[data$Neighborhood != "<undefined>"] 
         ~ data$Neighborhood[data$Neighborhood != "<undefined>"],
@@ -430,16 +455,21 @@ boxplot(data$TotalBsmtSF[data$Neighborhood != "<undefined>"]
         xlab= "Neighbourhood",
         col=rainbow(3))
 ```
-Pretpostavljamo da su sredine svih grupa jednake te uz gore navedene pretpostavke provodimo ANOVA test o jednakosti sredina.
-Nulta hipoteza je da su sredine za sve grupe jednake, a alternativna hipoteza je da se  razlikuju.
+
+Pretpostavljamo da su sredine svih grupa jednake te uz gore navedene
+pretpostavke provodimo ANOVA test o jednakosti sredina. Nulta hipoteza
+je da su sredine za sve grupe jednake, a alternativna hipoteza je da se
+razlikuju.
+
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
 res.aov <- aov( TotalBsmtSF~ factor(data$Neighborhood), data = data)
 summary(res.aov)
 ```
-8>
-Iz rezultata ANOVA testa možemo zaključiti da sredine tih uzoraka nisu jednake te odbaciti nultu hipotezu u korist tvrdnje da su sredine različite.
-ANOVA nam samo govori da su sredine tih kategorija međusobno različite, 
 
+8\> Iz rezultata ANOVA testa možemo zaključiti da sredine tih uzoraka
+nisu jednake te odbaciti nultu hipotezu u korist tvrdnje da su sredine
+različite. ANOVA nam samo govori da su sredine tih kategorija međusobno
+različite,
 
 ## Ovisnost cijene o veličini nekretnine:
 
@@ -535,4 +565,3 @@ cor(data$YearBuilt,data$SalePrice)
 
 cor.test(data$YearBuilt,data$SalePrice)
 ```
-
