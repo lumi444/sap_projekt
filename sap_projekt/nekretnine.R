@@ -43,4 +43,28 @@ mosaicplot(tableHSLS,
 
 
 
+install.packages("dplyr")
+library(dplyr)
 
+
+ames_by_bedrooms <- ames %>%
+  group_by(BedroomAbvGr) %>%
+  summarize(mean_price_sqft = mean(SalePrice/GrLivArea),
+            sd_price_sqft = sd(SalePrice/GrLivArea))
+
+aov <- aov(SalePrice/GrLivArea ~ BedroomAbvGr, data = ames)
+
+
+summary(aov)
+
+real_astate.grouped = aggregate(real_astate[c("GrLivArea","SalePrice")],
+                                real_astate[c("BedroomAbvGr")],
+                                FUN = sum)
+
+print(real_astate.grouped)
+
+barplot(real_astate.grouped$SalePrice/real_astate.grouped$GrLivArea,
+        main = "broj soba",
+        ylab = "cijena po kvadratu",
+        names.arg = real_astate.grouped$BedroomAbvGr,
+        las=2)
