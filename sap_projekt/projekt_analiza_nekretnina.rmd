@@ -103,8 +103,11 @@ barplot(table(data$Neighborhood),las=2,cex.names=.5,main='Neighborhood of houses
 
 
 ```
-Nadalje, mogli bi se zapitati koja je prosječna cijena kvadrata po kvartu, kako bi dobili bolji uvid u poželjnije kvartove za život.
+
+Nadalje, mogli bi se zapitati koja je prosječna cijena kvadrata po
+kvartu, kako bi dobili bolji uvid u poželjnije kvartove za život.
 \pagebreak
+
 ```{r}
 data$PricePerSqFt <- data$SalePrice / data$GrLivArea
 data_by_neighborhood <- data %>% group_by(Neighborhood) %>% 
@@ -140,10 +143,18 @@ mosaicplot(tableHSLS,
 ```
 
 ## Ovisnost cijene kvadrata nekretnine o broju spavaćih soba:
-Za utvrđivanje postoji li ovisnost između cijene kvadrata i broja spavaćih soba provest ćemo ANOVA test. ANOVA (analiza varijance) je statistički test koji se koristi za usporedbu srednjih vrijednosti više od dvije grupe. Često je dobro rješenje kada želimo utvrditi postoji li značajna razlika između srednjih vrijednosti više od dvije grupe, jer nam omogućuje testiranje više grupa odjednom.
-U kontekstu zadanog skupa podataka, ANOVA je dobro rješenje jer želimo usporediti srednje vrijednosti cijene po kvadratnom metru za kuće s različitim brojem spavaćih soba. 
-P-vrijednost za ovaj test iznosi zanemarivih <2e-16, što nam govori da postoji značajna razlika
-između srednjih vrijednosti grupa.
+
+Za utvrđivanje postoji li ovisnost između cijene kvadrata i broja
+spavaćih soba provest ćemo ANOVA test. ANOVA (analiza varijance) je
+statistički test koji se koristi za usporedbu srednjih vrijednosti više
+od dvije grupe. Često je dobro rješenje kada želimo utvrditi postoji li
+značajna razlika između srednjih vrijednosti više od dvije grupe, jer
+nam omogućuje testiranje više grupa odjednom. U kontekstu zadanog skupa
+podataka, ANOVA je dobro rješenje jer želimo usporediti srednje
+vrijednosti cijene po kvadratnom metru za kuće s različitim brojem
+spavaćih soba. P-vrijednost za ovaj test iznosi zanemarivih \<2e-16, što
+nam govori da postoji značajna razlika između srednjih vrijednosti
+grupa.
 
 ```{r}
 data_room0 <- data[data$BedroomAbvGr == c("0"),]
@@ -498,6 +509,13 @@ c("Pearson", cor(log_velicina, nekretnine.data$cijena, method = "pearson",
 
 ```
 
+```{r}
+nekretnine.data = data
+linear_regresion <- function(){
+  
+}
+```
+
 Prema Pearsonovom koeficijentu vidimo da su varijable zavisne što je
 bilo i za očekivati.
 
@@ -518,14 +536,78 @@ varijable koje bi mogle utjecati na cijenu:
 -   godina izgradnje
 -   broj soba
 
-```{r scatter plots}
+**Ovisnost cijene o kvadraturi nekretnine**
 
-plot(data$GrLivArea,data$SalePrice) #kvadratura vs cijena
+Očekivan rezultat bi bio linearan porast cijene kada se gleda samo
+parametar kvadratura nekretnine.
 
+```{r scatter plot}
+
+#plot(data$GrLivArea,data$SalePrice, col="skyblue", pch = 16) #kvadratura vs cijena
+
+linear_graph <- function(){
+  plot(data$GrLivArea,data$SalePrice, col="skyblue", pch = 16)
+  model <- lm(SalePrice~GrLivArea,data=data)
+  abline(model, col="thistle4")
+}
+linear_graph()
 fit.livarea = lm(SalePrice~GrLivArea,data=data)
 
-plot(data$GrLivArea,data$SalePrice) 
-lines(data$GrLivArea,fit.livarea$SalePrice,col='red') 
+#plot(data$GrLivArea,data$SalePrice) 
+#lines(data$GrLivArea,fit.livarea$SalePrice,col='red') 
+```
+
+Ako uzmemo godinu izgradnje kao definiranu vrijednost: 2005.\
+
+```{r scatter plot}
+
+linear_graph <- function(region_data, yearBuilt){
+  platform_data = data[region_data$YearBuilt == yearBuilt,]
+  plot(platform_data$GrLivArea,platform_data$SalePrice, col="skyblue", pch = 16)
+  model <- lm(SalePrice~GrLivArea,data=platform_data)
+  abline(model, col="thistle4")
+}
+linear_graph(data, "2005")
+```
+
+Ako uzmemo broj soba kao definiranu vrijednost: 7.
+
+```{r scatter plot}
+
+linear_graph <- function(region_data, totRmsAbvGrd){
+  platform_data = data[region_data$TotRmsAbvGrd == totRmsAbvGrd,]
+  plot(platform_data$GrLivArea,platform_data$SalePrice, col="skyblue", pch = 16)
+  model <- lm(SalePrice~GrLivArea,data=platform_data)
+  abline(model, col="thistle4")
+}
+linear_graph(data, "7")
+```
+
+**Ovisnost cijene o godini izgradnje nekretnine**
+
+```{r}
+
+linear_graph2 <- function(){
+  plot(data$YearBuilt,data$SalePrice, col="skyblue", pch = 16)
+  model <- lm(SalePrice~YearBuilt,data=data)
+  abline(model, col="thistle4")
+}
+linear_graph2()
+```
+
+**Ovisnost cijene o broju soba nekretnine**
+
+Uzet ćemo TotRmsAbvGrd (ukupni broj soba iznad podruma) kao ukupan broj
+soba.
+
+```{r}
+
+linear_graph3 <- function(){
+  plot(data$TotRmsAbvGrd,data$SalePrice, col="skyblue", pch = 16)
+  model <- lm(SalePrice~TotRmsAbvGrd,data=data)
+  abline(model, col="thistle4")
+}
+linear_graph3()
 ```
 
 ### Normalnost reziduala i homogenost varijance
