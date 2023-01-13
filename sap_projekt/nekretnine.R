@@ -68,3 +68,121 @@ barplot(real_astate.grouped$SalePrice/real_astate.grouped$GrLivArea,
         ylab = "cijena po kvadratu",
         names.arg = real_astate.grouped$BedroomAbvGr,
         las=2)
+
+
+
+######################################darkovo
+library(dplyr)   
+
+data$BedroomAbvGr <- as.factor(data$BedroomAbvGr)
+data$BedroomAbvGr
+class(data$BedroomAbvGr)
+
+class(data$SalePrice)
+class(data$GrLivArea)
+data$PricePerSqFt <- as.numeric(data$SalePrice) / as.numeric(data$GrLivArea)
+data$PricePerSqFt
+class(data$PricePerSqFt)
+
+bartlett.test(
+  list(data$PricePerSqFt[data$BedroomAbvGr=='0'],
+       data$PricePerSqFt[data$BedroomAbvGr=='1'],
+       data$PricePerSqFt[data$BedroomAbvGr=='2'],
+       data$PricePerSqFt[data$BedroomAbvGr=='3'],
+       data$PricePerSqFt[data$BedroomAbvGr=='4'],
+       data$PricePerSqFt[data$BedroomAbvGr=='5'],
+       data$PricePerSqFt[data$BedroomAbvGr=='6']
+  )
+)
+
+
+#buduci da uzorak nema homogene varijance, probati cemo problem rijesiti s  kruskal-wallis
+#koji to ne pretpostavlja
+
+
+
+kruskal.test(data$PricePerSqFt~data$BedroomAbvGr)
+#p vrijednost je manje od 0.05 da odbacujemo hipotezu da ne ovisi o broju soba ????????''
+
+########################################
+data$BedroomAbvGr = factor(data$BedroomAbvGr,levels = c(0,1,2,3,4,5,6,7,8),labels = c('0','1','2','3','4','5','6','7','8'))
+data$PricePerSqFt <- data$SalePrice / data$GrLivArea
+data_by_bedrooms <- data %>%
+  group_by(BedroomAbvGr)%>%
+  summarize(mean_price_sqft =mean(SalePrice/GrLivArea),
+            sd_price_sqft=sd(SalePrice/GrLivArea),
+  )
+
+levels(data_by_bedrooms$BedroomAbvGr)
+require(nortest)
+lillie.test(data$PricePerSqFt)
+lillie.test(data$PricePerSqFt[data_by_bedrooms$BedroomAbvGr=='0'])
+lillie.test(data$PricePerSqFt[data_by_bedrooms$BedroomAbvGr=='1'])
+lillie.test(data$PricePerSqFt[data_by_bedrooms$BedroomAbvGr=='2'])
+lillie.test(data$PricePerSqFt[data_by_bedrooms$BedroomAbvGr=='3'])
+lillie.test(data$PricePerSqFt[data_by_bedrooms$BedroomAbvGr=='4'])
+lillie.test(data$PricePerSqFt[data_by_bedrooms$BedroomAbvGr=='5'])
+lillie.test(data$PricePerSqFt[data_by_bedrooms$BedroomAbvGr=='6'])
+lillie.test(data$PricePerSqFt[data_by_bedrooms$BedroomAbvGr=='8'])
+
+
+data = data[complete.cases(data),] 
+data = data[data$BedroomAbvGr %in% c(0,1,2,3,4,5,6,7,8),]
+
+for(i in unique(data$BedroomAbvGr)){
+  if(length(data$PricePerSqFt[data$BedroomAbvGr==i]) < 2){
+    warning(paste("Bedroom ",i," has less than 2 observations"))
+  }
+  else{
+    bartlett.test(data$PricePerSqFt[data$BedroomAbvGr==i])
+  }
+}
+
+
+
+
+
+bartlett.test(data$PricePerSqFt ~ data$BedroomAbvGr)
+# Perform Bartlett's test on SalePrice variances grouped by number of rooms
+bartlett.test(list(data$PricePerSqFt[data$BedroomAbvGr=='0']),list(data$PricePerSqFt[data$BedroomAbvGr=='1']),
+              list(data$PricePerSqFt[data$BedroomAbvGr=='2']),list(data$PricePerSqFt[data$BedroomAbvGr=='3']),
+              list(data$PricePerSqFt[data$BedroomAbvGr=='4']),list(data$PricePerSqFt[data$BedroomAbvGr=='5']),
+              list(data$PricePerSqFt[data$BedroomAbvGr=='6']),list(data$PricePerSqFt[data$BedroomAbvGr=='7']),list(data$PricePerSqFt[data$BedroomAbvGr=='8']))
+
+# Print the test statistics and p-value
+print(bartlett_test)
+
+prices = c(data$PricePerSqFt[data$BedroomAbvGr=='0'], data$PricePerSqFt[data$BedroomAbvGr=='1'],
+           data$PricePerSqFt[data$BedroomAbvGr=='2'], data$PricePerSqFt[data$BedroomAbvGr=='3'],
+           data$PricePerSqFt[data$BedroomAbvGr=='4'], data$PricePerSqFt[data$BedroomAbvGr=='5'],
+           data$PricePerSqFt[data$BedroomAbvGr=='6'], data$PricePerSqFt[data$BedroomAbvGr=='7'], 
+           data$PricePerSqFt[data$BedroomAbvGr=='8'])
+bedrooms = c(rep(0,length(data$PricePerSqFt[data$BedroomAbvGr=='0'])), 
+             rep(1,length(data$PricePerSqFt[data$BedroomAbvGr=='1'])),
+             rep(2,length(data$PricePerSqFt[data$BedroomAbvGr=='2'])), 
+             rep(3,length(data$PricePerSqFt[data$BedroomAbvGr=='3'])),
+             rep(4,length(data$PricePerSqFt[data$BedroomAbvGr=='4'])), 
+             rep(5,length(data$PricePerSqFt[data$BedroomAbvGr=='5'])),
+             rep(6,length(data$PricePerSqFt[data$BedroomAbvGr=='6'])), 
+             rep(7,length(data$PricePerSqFt[data$BedroomAbvGr=='7'])),
+             rep(8,length(data$PricePerSqFt[data$BedroomAbvGr=='8'])))
+bartlett.test(data_by_bedrooms1$BedroomAbvGr ~ data_by_bedrooms1$mean_price_sqft)
+
+summary(data)
+
+
+
+
+
+bartlett.test(data$PricePerSqFt ~ data$BedroomAbvGr)
+lillie.test(creditdata$income[creditdata$education=='elementary'])
+lillie.test(creditdata$income[creditdata$education=='secondary'])
+lillie.test(creditdata$income[creditdata$education=='university'])
+
+hist(creditdata$income[creditdata$education=='elementary'])
+hist(creditdata$income[creditdata$education=='secondary'])
+hist(creditdata$income[creditdata$education=='university'])
+
+
+
+
