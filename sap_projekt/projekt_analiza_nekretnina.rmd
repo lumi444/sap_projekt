@@ -146,6 +146,42 @@ P-vrijednost za ovaj test iznosi zanemarivih <2e-16, što nam govori da postoji 
 između srednjih vrijednosti grupa.
 
 ```{r}
+library(dplyr)   
+
+data$BedroomAbvGr <- as.factor(data$BedroomAbvGr)
+data$BedroomAbvGr
+class(data$BedroomAbvGr)
+
+class(data$SalePrice)
+class(data$GrLivArea)
+data$PricePerSqFt <- as.numeric(data$SalePrice) / as.numeric(data$GrLivArea)
+data$PricePerSqFt
+class(data$PricePerSqFt)
+
+bartlett.test(
+  list(data$PricePerSqFt[data$BedroomAbvGr=='0'],
+       data$PricePerSqFt[data$BedroomAbvGr=='1'],
+       data$PricePerSqFt[data$BedroomAbvGr=='2'],
+       data$PricePerSqFt[data$BedroomAbvGr=='3'],
+       data$PricePerSqFt[data$BedroomAbvGr=='4'],
+       data$PricePerSqFt[data$BedroomAbvGr=='5'],
+       data$PricePerSqFt[data$BedroomAbvGr=='6']
+  )
+)
+
+
+#buduci da uzorak nema homogene varijance, probati cemo problem rijesiti s  kruskal-wallis
+#koji to ne pretpostavlja
+
+
+
+kruskal.test(data$PricePerSqFt~data$BedroomAbvGr)
+#p vrijednost je manje od 0.05 da odbacujemo hipotezu da ne ovisi o broju soba ????????''
+
+
+
+
+
 data_room0 <- data[data$BedroomAbvGr == c("0"),]
 hist(mean(data_room0$SalePrice/data_room0$GrLivArea),
      main = "Cijena kvadrata nekretnina koje nemaju sobe",
