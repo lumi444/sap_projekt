@@ -190,8 +190,11 @@ data$PricePerSqFt <- data$SalePrice / data$GrLivArea
 data_by_neighborhood <- data %>% group_by(Neighborhood) %>% 
   summarize(MeanPricePerSqFt = mean(PricePerSqFt))
 
+
+
 ggplot(data_by_neighborhood, aes(x = Neighborhood, y = MeanPricePerSqFt)) + 
   geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90))
+
 
 ```
 
@@ -207,10 +210,10 @@ ovisnost tih dvaju atributa, provodimo hi-kvadrat test. Test
 nezavisnosti $\chi^2$ test u programskom paketu R implementiran je u
 funkciji `chisq.test()` koja kao ulaz prima kontingencijsku tablicu
 podataka koje testiramo na nezavisnost. Testom utvrđujemo p-vrijednost,
-koja je manja od 0.05, stoga zaključujemo da broj katova nekretnine ne
-ovisi o obliku čestice.
+koja je manja od 0.05, stoga odbacujemo nultu hipotezu na razini
+znacajnosti 5%, dakle x i y su zavisne.
 
-**H0: x i Y su nezavise**\
+**H0: X i Y su nezavisne**\
 **H1: X i Y su zavisne**\
 **Pri čemu je X=LotShape, a Y=HouseStyle**\
 
@@ -232,29 +235,41 @@ mosaicplot(tableHSLS,
 ## Ovisnost cijene kvadrata nekretnine o broju spavaćih soba
 
 Za utvrđivanje postoji li ovisnost između cijene kvadrata i broja
-spavaćih soba provest ćemo ANOVA test. ANOVA (analiza varijance) je
-statistički test koji se koristi za usporedbu srednjih vrijednosti više
-od dvije grupe. Često je dobro rješenje kada želimo utvrditi postoji li
-značajna razlika između srednjih vrijednosti više od dvije grupe, jer
-nam omogućuje testiranje više grupa odjednom. U kontekstu zadanog skupa
-podataka, ANOVA je dobro rješenje jer želimo usporediti srednje
-vrijednosti cijene po kvadratnom metru za nekretnine s različitim brojem
-spavaćih soba. P-vrijednost za ovaj test iznosi zanemarivih \<2e-16, što
-nam govori da postoji značajna razlika između srednjih vrijednosti
-grupa.
+spavaćih soba pokušat ćemo provest ANOVA test. ANOVA (analiza varijance)
+je statistički test koji se koristi za usporedbu srednjih vrijednosti
+više od dvije grupe. Često je dobro rješenje kada želimo utvrditi
+postoji li značajna razlika između srednjih vrijednosti više od dvije
+grupe, jer nam omogućuje testiranje više grupa odjednom. Za početak
+potrebno je provjeriti homogenost i normalnost, međutim Bartlletovim
+testom utvrđujemo kako uzorak nema homogene varijance, a ni normalnu
+razdiobu po grupama, što je provjereno Lillieforsovom inačicom Kolmogorov-Smirnov
+testa. Stoga ćemo provesti Kruskal-Wallis test za provjeru uvjetuje li
+broj soba cijenu kvadrata. P-vrijednost dobivenog rezultata je manja od
+0.05, pa na razini značajnosti 5% ozbacujemo hipotezi da su PricePerSqFt i BedroomAbvGr
+nezavisne, stoga zaključujemo da broj soba uvjetuje cijenu kvadrata.\
+
+
 
 ```{r}
 library(dplyr)   
 
 data$BedroomAbvGr <- as.factor(data$BedroomAbvGr)
-data$BedroomAbvGr
-class(data$BedroomAbvGr)
 
-class(data$SalePrice)
-class(data$GrLivArea)
 data$PricePerSqFt <- as.numeric(data$SalePrice) / as.numeric(data$GrLivArea)
-data$PricePerSqFt
-class(data$PricePerSqFt)
+
+
+require(nortest)
+
+lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='0'])
+lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='1'])
+lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='2'])
+lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='3'])
+lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='4'])
+lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='5'])
+lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='6'])
+#Za provjeru normalnosti koristimo Lillieforsovu inačicu KS testa, već nakon provjera za nekretnine s 3 sobe utvrđujemo da pretpotavka normalnosti nije zadovoljena. Iako već sad znamo da ne možemo provesti ANOVA test, provjerit ćemo i homogenost kao u auditornim vježbama.
+#nekretnina sa sedam soba nema, a s osam postoji samo jedna
+
 
 bartlett.test(
   list(data$PricePerSqFt[data$BedroomAbvGr=='0'],
@@ -267,6 +282,13 @@ bartlett.test(
   )
 )
 
+mean(data$PricePerSqFt[data$BedroomAbvGr=='0'])
+mean(data$PricePerSqFt[data$BedroomAbvGr=='1'])
+mean(data$PricePerSqFt[data$BedroomAbvGr=='2'])
+mean(data$PricePerSqFt[data$BedroomAbvGr=='3'])
+mean(data$PricePerSqFt[data$BedroomAbvGr=='4'])
+mean(data$PricePerSqFt[data$BedroomAbvGr=='5'])
+mean(data$PricePerSqFt[data$BedroomAbvGr=='6'])
 
 #buduci da uzorak nema homogene varijance, probati cemo problem rijesiti s  kruskal-wallis
 #koji to ne pretpostavlja
@@ -274,96 +296,22 @@ bartlett.test(
 
 
 kruskal.test(data$PricePerSqFt~data$BedroomAbvGr)
-#p vrijednost je manje od 0.05 da odbacujemo hipotezu da ne ovisi o broju soba ????????''
+#p vrijednost je manje od 0.05 da odbacujemo hipotezu da ne ovisi o broju soba
 
-
-
-
-
-data_room0 <- data[data$BedroomAbvGr == c("0"),]
-hist(mean(data_room0$SalePrice/data_room0$GrLivArea),
-     main = "Cijena kvadrata nekretnina koje nemaju sobe",
-     col="purple", xlab="broj soba")
-qqnorm(mean(data_room0$SalePrice/data_room0$GrLivArea), 
-       main="Cijena kvadrata nekretnina koje nemaju sobe")
-qqline(mean(data_room0$SalePrice/data_room0$GrLivArea), col="blue")
-
-data_room1 <- data[data$BedroomAbvGr == c("1"),]
-hist(mean(data_room1$SalePrice/data_room0$GrLivArea),
-     main = "Cijena kvadrata nekretnina koje imaju 1 sobu",
-     col="purple", xlab="broj soba")
-qqnorm(mean(data_room1$SalePrice/data_room0$GrLivArea), 
-       main="Cijena kvadrata nekretnina koje imaju 1 sobu")
-qqline(mean(data_room1$SalePrice/data_room0$GrLivArea), col="blue")
-
-data_room2 <- data[data$BedroomAbvGr == c("2"),]
-
-qqnorm(mean(data_room2$SalePrice/data_room2$GrLivArea), 
-       main="Cijena kvadrata nekretnina koje imaju 2  sobe")
-qqline(mean(data_room2$SalePrice/data_room2$GrLivArea), col="blue")
-
-data_room3 <- data[data$BedroomAbvGr == c("3"),]
-hist(mean(data_room3$SalePrice/data_room3$GrLivArea),
-     main = "Cijena kvadrata nekretnina koje imaju 3 sobe",
-     col="purple", xlab="broj soba")
-qqnorm(mean(data_room3$SalePrice/data_room3$GrLivArea), 
-       main="Cijena kvadrata nekretnina koje imaju 3 sobe")
-qqline(mean(data_room3$SalePrice/data_room3$GrLivArea), col="blue")
-
-data_room4 <- data[data$BedroomAbvGr == c("4"),]
-hist(mean(data_room4$SalePrice/data_room4$GrLivArea),
-     main = "Cijena kvadrata nekretnina koje imaju 4 sobe",
-     col="purple", xlab="broj soba")
-qqnorm(mean(data_room4$SalePrice/data_room4$GrLivArea), 
-       main="Cijena kvadrata nekretnina koje imaju 4 sobe")
-qqline(mean(data_room4$SalePrice/data_room4$GrLivArea), col="blue")
-
-data_room5 <- data[data$BedroomAbvGr == c("5"),]
-hist(mean(data_room5$SalePrice/data_room5$GrLivArea),
-     main = "Cijena kvadrata nekretnina koje imaju 5 sobe",
-     col="purple", xlab="broj soba")
-qqnorm(mean(data_room5$SalePrice/data_room5$GrLivArea), 
-       main="Cijena kvadrata nekretnina koje imaju 5 sobe")
-qqline(mean(data_room5$SalePrice/data_room5$GrLivArea), col="blue")
-
-data_room6 <- data[data$BedroomAbvGr == c("6"),]
-hist(mean(data_room6$SalePrice/data_room6$GrLivArea),
-     main = "Cijena kvadrata nekretnina koje imaju 6 soba",
-     col="purple", xlab="broj soba")
-qqnorm(mean(data_room6$SalePrice/data_room6$GrLivArea), 
-       main="Cijena kvadrata nekretnina koje imaju 6 soba")
-qqline(mean(data_room6$SalePrice/data_room6$GrLivArea), col="blue")
-
-data_room8 <- data[data$BedroomAbvGr == c("8"),]
-hist(mean(data_room8$SalePrice/data_room8$GrLivArea),
-     main = "Cijena kvadrata nekretnina koje imaju 8 soba",
-     col="purple", xlab="broj soba")
-qqnorm(mean(data_room8$SalePrice/data_room8$GrLivArea), 
-       main="Cijena kvadrata nekretnina koje imaju 8 soba")
-qqline(mean(data_room8$SalePrice/data_room8$GrLivArea), col="blue")
-
-var(na.omit(mean(data_room0$SalePrice/data_room0$GrLivArea)))
-var(na.omit(mean(data_room1$SalePrice/data_room1$GrLivArea)))
-var(na.omit(mean(data_room2$SalePrice/data_room2$GrLivArea)))
-var(na.omit(mean(data_room3$SalePrice/data_room3$GrLivArea)))
-var(na.omit(mean(data_room4$SalePrice/data_room4$GrLivArea)))
-var(na.omit(mean(data_room5$SalePrice/data_room5$GrLivArea)))
-var(na.omit(mean(data_room6$SalePrice/data_room6$GrLivArea)))
-var(na.omit(mean(data_room8$SalePrice/data_room8$GrLivArea)))
-
-res.aov <- aov( SalePrice/GrLivArea~ BedroomAbvGr, data = data)
-summary(res.aov)
 
 data_by_bedrooms <- data %>%
   group_by(BedroomAbvGr)%>%
   summarize(mean_price_sqft =mean(SalePrice/GrLivArea),
             sd_price_sqft=sd(SalePrice/GrLivArea))
+
+legenda = c("0 Soba", "1 Soba", "2 Sobe", "3 Sobe", "4 Sobe", "5 Soba", "6 Soba", "8 Soba")
+
+
  ggplot(data = data_by_bedrooms, 
-        aes(x = BedroomAbvGr, y = mean_price_sqft)) + geom_bar(stat = "identity")
+        aes(x = BedroomAbvGr, y = mean_price_sqft,fill = legenda)) + geom_bar(stat = "identity")
 ```
 
-ZAKLJUČAK: odbacujemo nultu hipotezu, to jest cijena kvadrata nekretnine
-ne ovisi o broju spavaćih soba \pagebreak
+\pagebreak
 
 ## Ovisi li velicina podruma o kvartu u gradu
 
