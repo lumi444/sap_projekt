@@ -39,6 +39,8 @@ tipu podataka. \## Deskriptivna statistika skupa podataka:
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
+install.packages("nortest")
+library(nortest)
 data=read.csv('preprocessed_data.csv')
 
 ```
@@ -538,112 +540,121 @@ varijable koje bi mogle utjecati na cijenu:
 
 **Ovisnost cijene o kvadraturi nekretnine**
 
-Očekivan rezultat bi bio linearan porast cijene kada se gleda samo
-parametar kvadratura nekretnine.
+Kad promatramo utjecaj samo jedne nezavisne varijable X na neku zavisnu
+varijablu Y, grafički je moguće dobiti jako dobar dojam o njihovom
+odnosu - tu je najčešće od pomoći scatter plot.
 
-```{r scatter plot}
-
-#plot(data$GrLivArea,data$SalePrice, col="skyblue", pch = 16) #kvadratura vs cijena
-
+```{r scatter plots}
 linear_graph <- function(){
-  plot(data$GrLivArea,data$SalePrice, col="skyblue", pch = 16)
+  plot(data$GrLivArea,data$SalePrice, col="darkgrey", pch = 16) #prosjecna kvadratura vs cijena
   model <- lm(SalePrice~GrLivArea,data=data)
-  abline(model, col="thistle4")
-}
-linear_graph()
-fit.livarea = lm(SalePrice~GrLivArea,data=data)
-
-#plot(data$GrLivArea,data$SalePrice) 
-#lines(data$GrLivArea,fit.livarea$SalePrice,col='red') 
-```
-
-Ako uzmemo godinu izgradnje kao definiranu vrijednost: 2005.\
-
-```{r scatter plot}
-
-linear_graph <- function(region_data, yearBuilt){
-  platform_data = data[region_data$YearBuilt == yearBuilt,]
-  plot(platform_data$GrLivArea,platform_data$SalePrice, col="skyblue", pch = 16)
-  model <- lm(SalePrice~GrLivArea,data=platform_data)
-  abline(model, col="thistle4")
-}
-linear_graph(data, "2005")
-```
-
-Ako uzmemo broj soba kao definiranu vrijednost: 7.
-
-```{r scatter plot}
-
-linear_graph <- function(region_data, totRmsAbvGrd){
-  platform_data = data[region_data$TotRmsAbvGrd == totRmsAbvGrd,]
-  plot(platform_data$GrLivArea,platform_data$SalePrice, col="skyblue", pch = 16)
-  model <- lm(SalePrice~GrLivArea,data=platform_data)
-  abline(model, col="thistle4")
-}
-linear_graph(data, "7")
-```
-
-**Ovisnost cijene o godini izgradnje nekretnine**
-
-```{r}
-
-linear_graph2 <- function(){
-  plot(data$YearBuilt,data$SalePrice, col="skyblue", pch = 16)
+  abline(model, col="tomato")
+  plot(data$YearBuilt,data$SalePrice, col="darkgrey", pch = 16) #prosjecni godina izgradnje vs cijena
   model <- lm(SalePrice~YearBuilt,data=data)
-  abline(model, col="thistle4")
-}
-linear_graph2()
-```
-
-**Ovisnost cijene o broju soba nekretnine**
-
-Uzet ćemo TotRmsAbvGrd (ukupni broj soba iznad podruma) kao ukupan broj
-soba.
-
-```{r}
-
-linear_graph3 <- function(){
-  plot(data$TotRmsAbvGrd,data$SalePrice, col="skyblue", pch = 16)
+  abline(model, col="tomato")
+  plot(data$TotRmsAbvGrd,data$SalePrice, col="darkgrey", pch = 16) #prosjecna broj soba vs cijena
   model <- lm(SalePrice~TotRmsAbvGrd,data=data)
-  abline(model, col="thistle4")
+  abline(model, col="tomato")
 }
-linear_graph3()
+
+linear_graph()
+
 ```
 
-### Normalnost reziduala i homogenost varijance
+Očito je da kvadratura (i godina izgradnje i broj soba) ima izražen (i
+to pozitivan) utjecaj na izlaznu varijablu.
+
+Kako bi ispitali pojedinačni utjecaj ovih varijabli, procijenit ćemo
+model jednostavne regresije - po jedan za svaku nezavisnu varijablu (uz
+cnt - broj iznajmljenih bicikala - kao zavisnu varijablu).
+
+Regresijski model procjenjuje se funkcijom lm() koja kao parametre prima
+zavisne i nezavisne varijable, odnosno data.frame sa svim varijablama i
+definiciju varijabli u modelu.
+
+```{r jednostavna regresija}
+
+fit.kvadratura = lm(data$SalePrice~data$GrLivArea,data=data) #linearni model cijene nekretnina (SalePrice) i kvadratura nekretnine (GrLivArea)
+
+fit.godinaIzgradnje = lm(data$SalePrice~data$YearBuilt,data=data) #linearni model cijene nekretnina (SalePrice) i godinu izgradnje nekretnine (YearBuilt)
+
+fit.brojSoba = lm(data$SalePrice~data$TotRmsAbvGrd,data=data) #linearni model cijene nekretnina (SalePrice) i broj soba u nekretnin (TotRmsAbvGrd)
+
+plot(data$GrLivArea,data$SalePrice) #graficki prikaz podataka
+lines(data$GrLivArea,fit.kvadratura$fitted.values,col='red') #graficki prikaz procijenjenih vrijednosti iz modela
+
+plot(data$YearBuilt,data$SalePrice) #graficki prikaz podataka
+lines(data$YearBuilt,fit.godinaIzgradnje$fitted.values,col='red') #graficki prikaz procijenjenih vrijednosti iz modela
+
+plot(data$TotRmsAbvGrd,data$SalePrice) #graficki prikaz podataka
+lines(data$TotRmsAbvGrd,fit.brojSoba$fitted.values,col='red') #graficki prikaz procijenjenih vrijednosti iz modela
+
+```
+
+Nagibi pravaca linearne regresije potvrđuju tvrdnje o efektima pojedinih
+razmatranih varijabli na izlaznu varijablu. Kako bi se dobiveni modeli
+analizirali i usporedili, prvo je potrebno provjeriti da pretpostavke
+modela nisu (jako) narušene. Pritom su najbitnije pretpostavke o
+regresorima (u multivarijatnoj regresiji regresori ne smiju biti
+međusobno jako korelirani) i o rezidualima (normalnost reziduala i
+homogenost varijance).
+
+**Normalnost reziduala i homogenost varijance**
 
 Normalnost reziduala moguće je provjeriti grafički, pomoću
 kvantil-kvantil plota (usporedbom s linijom normalne razdiobe), te
-statistički pomoću Kolmogorov-Smirnovljevog testa.
+statistički pomoću Anderson-Darlingovog testa.
 
-```{r}
-selected.model = fit.livarea
-plot(selected.model$residuals) 
-```
+```{r res}
 
-```{r}
+selected.model = fit.kvadratura
+
+plot(selected.model$residuals) #gledajuci reziduale na ovaj nacin tesko je suditi o normalnosti
+
+#histogram je vrlo interpretativan
 hist((selected.model$residuals))
 hist(rstandard(selected.model))
-```
 
 #q-q plot reziduala s linijom normalne distribucije
-
-```{r}
 qqnorm(rstandard(selected.model))
 qqline(rstandard(selected.model))
 
 plot(selected.model$fitted.values,selected.model$residuals) #reziduale je dobro prikazati u ovisnosti o procjenama modela
+
+plot(data$SalePrice,selected.model$residuals) #a ponekad i u ovisnosti o nekim drugim varijablama koje je mozda tesko modelirati kao nezavisne varijable s linearnim efektom na izlaz
+
+#AD test na normalnost 
+ad.test(rstandard(fit.kvadratura))
+
+require(nortest)
+lillie.test(rstandard(fit.kvadratura))
+
 ```
 
-```{r}
-#install.packages("nortest")
-#library(nortest)
-#require(nortest)
-#lillie.test(rstandard(fit.livarea))
-```
+Grafički prikaz reziduala samo po indeksu po kojem su dani u podatcima
+rijetko kad može dati potpunu sliku o njihovoj prirodi - doduše, u ovom
+slučaju su podatci poredani po cijeni - koji svjedoči o određenoj
+zavisnosti podataka.
 
-```{r}
-cor(data$YearBuilt,data$SalePrice)
+Histogram je vrlo lako čitljiv i interpretativan način prikazivanja
+ovakvih varijabli, te se lako može zaključiti nešto o općenitom obliku
+distribucije reziduala - u ovom slučaju, ta distribucija donekle
+nalikuje normalnoj (što otprilike pokazuje i q-q plot), te nije previše
+zakrivljena.
 
-cor.test(data$YearBuilt,data$SalePrice)
+Također je jako bitno da u ovisnosti o predviđanjima modela sami
+reziduali ne pokazuju heterogenost varijance (ne "šire" se s povećanjem
+\$\\hat{y}\$). No, u ovisnosti o cijeni postoji određena dinamika
+reziduala (ne "izgledaju" potpuno slučajno) koju model ne objašnjava.
+Takve vremenske zavisnosti se najčešće modeliraju tzv. autoregresivnim
+modelima (ARMA, ARIMA, ARIMAX, itd.).
+
+```{r analiza procijenjenih modela}
+
+summary(fit.kvadratura)
+
+summary(fit.godinaIzgradnje)
+
+summary(fit.brojSoba)
+
 ```
