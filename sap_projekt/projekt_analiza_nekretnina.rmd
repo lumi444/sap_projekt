@@ -1,13 +1,11 @@
 ---
 title: "Projekt - Analiza tržišta nekretnina"
 author: "Marko Dodik, Silvija Gojević, Lucija Mičić, Antonia Žaja"
-date: "19.12.2022."
-output:
-  html_document:
-    df_print: paged
+date: "15.01.2023."
+output: pdf_document
 subtitle: Grupa FerovkeiFerovac
-editor_options:
-  markdown:
+editor_options: 
+  markdown: 
     wrap: 72
 ---
 
@@ -17,9 +15,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Opis projekta:
 
-Ovaj projekt obavezni dio je izbornog kolegija Statistička analiza
-podataka na Fakultetu elektrotehnike i računarstva. Svrha projekta je
-primjena teorijskih temelja stečenih na predavanjima na skup podataka iz
+Ovaj projekt obavezni je dio izbornog kolegija Statistička analiza
+podataka na Fakultetu elektrotehnike i računarstva. Svrha projekta je primjena
+teorijskih temelja stečenih na predavanjima na skup podataka iz
 stvarnog svijeta. Kao pomoć u izradi projekta korišten je programski
 jezik R koji je pružio potporu za izvođenje testiranja i bolju
 vizualizaciju podataka, te programski paket RStudio.
@@ -28,44 +26,39 @@ vizualizaciju podataka, te programski paket RStudio.
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
-install.packages("nortest")
-library(nortest)
 library(kableExtra)
 ```
 
 ## Opis problema:
 
-Kupci često traže nekretnine sa određenim kriterijima (npr. određeni
-broj soba, veličina dvorišta), no takve "luksuze" ne žele preplatiti.
-Također, cijene nekretnina zbog razinih razloga znaju biti napuhane, dok
-je bankama u interesu objektivno procijeniti vrijednost nekretnine za
-potrebe kreditiranja klijenta. Upravo zato se prikupljaju podaci o
-prodanim nekretninama Cilj projektnog zadatka je analizirati te podatke
-i analizirati uspješnost prodaje nekretnina ovisno o značajkama koje ona
-sadrži.
+Kupci često traže nekretnine sa određenim kriterijima (npr. određeni broj soba, 
+veličina dvorišta), no takve "luksuze" ne žele preplatiti. Također, cijene nekretnina
+zbog razinih razloga znaju biti napuhane, dok je bankama u interesu objektivno
+procijeniti vrijednost nekretnine za potrebe kreditiranja klijenta. Upravo zato se
+prikupljaju podaci o prodanim nekretninama
+Cilj projektnog zadatka je analizirati te podatke i analizirati uspješnost prodaje 
+nekretnina ovisno o značajkama koje ona sadrži. 
 
 ```{r}
 #učitavanje podataka
 data=read.csv('preprocessed_data.csv')
-```
+``` 
+
 
 ## Skup podataka:
 
-Skup podataka koji se koristi u ovom projektu predstavlja informacije o
-prodanim nekretninama u gradu Ames (Iowa, Sjedinjenje Američke Države).
-Odnosi se na prodane nekretnine u sljedećim godinama: 2006., 2007.,
-2008., 2009. i 2010. Svaka nekretnina opisana je s 81 značajkom. Neke od
-značajki su kvadratura (LotArea), naziv susjedstva u kojem se nekretnina
-nalazi (Neighborhood), veličina podruma (TotalBsmtSF), tip krova
-(RoofStyle), broj spavaćih soba (Bedroom - nisu uračunate sobe u
-podrumu), lokacija garaže (GarageType) i slično. Ukupno je prikupljeno
-1460 zapisa.
+Skup podataka koji se koristi u ovom projektu predstavlja informacije o prodanim
+nekretninama u gradu Ames (Iowa, Sjedinjenje Američke Države). Odnosi se na prodane
+nekretnine u sljedećim godinama: 2006., 2007., 2008., 2009. i 2010. Svaka nekretnina
+opisana je s 81 značajkom. Neke od značajki su kvadratura (LotArea), naziv susjedstva u kojem
+se nekretnina nalazi (Neighborhood), veličina podruma (TotalBsmtSF), tip krova (RoofStyle), 
+broj spavaćih soba (Bedroom - nisu uračunate sobe u podrumu), lokacija garaže (GarageType) i slično.
+Ukupno je prikupljeno 1460 zapisa. 
 
 ```{r}
 #prikaz svih značajki
 names(data)
 ```
-
 \vspace{1em}
 
 ```{r}
@@ -73,13 +66,14 @@ names(data)
 nrow(data)
 ```
 
+
+
 ## Deskriptivna statistika skupa podataka:
 
-Proučavamo tržište nekretnina u godinama od periodu od 2006. do 2010.
-godine (uključivo). Na sljedećem dijagramu, prikazani su udjeli broja
-prodanih nekretnina po godinama. Iz njega vidimo kako je 2009. godine
-prodan najveći broj nekretnina (23.15%). Za prikaz ovih podataka je
-odabran strukturni krug.
+Proučavamo tržište nekretnina u godinama od periodu od 2006. do 2010. godine (uključivo).
+Na sljedećem dijagramu, prikazani su udjeli broja prodanih nekretnina po godinama.
+Iz njega vidimo kako je 2009. godine prodan najveći broj nekretnina (23.15%). Za prikaz
+ovih podataka je odabran strukturni krug.
 
 ```{r, fig.align='center'}
 #računanje broja prodanih nekretnina po godinama korištenjem značajke YrSold
@@ -92,13 +86,9 @@ labels = paste(labels,"%")
 pie(values, labels=labels, col=rainbow(length(labels)))
 
 ```
-
 \vspace{1em}
-
-Zanimljiva informacija koja se može saznati iz danih podataka je u kojim
-mjesecima se tijekom godina najviše nekretnina prodalo. Iz sljedećeg
-stupičastog dijagrama vidimo kako je to u kasnim proljetnim i ljetnim
-mjesecima.
+Zanimljiva informacija koja se može saznati iz danih podataka je u kojim mjesecima se tijekom godina
+najviše nekretnina prodalo. Iz sljedećeg stupičastog dijagrama vidimo kako je to u kasnim proljetnim i ljetnim mjesecima.
 
 ```{r, fig.align='center'}
 #računanje broja prodanih nekretnina po mjesecima korištenjem značajke MoSold
@@ -113,26 +103,22 @@ barplot(values, ylab = "Houses sold", names.arg = labels, col = rainbow(length(l
 
 Sljedeći dijagram prikazuje broj spavaćih soba prodanih nekretnina. Iz
 njega možemo zaključiti da prosječni broj spavaćih soba prodanih
-nekretnina iznosi 3. Najmanji broj spavaćih soba među prikupljenim
-podacima je 0, a najveći 8. Za prikaz ovih podataka odabran je
-histogram, broj razreda je 25.
+nekretnina iznosi 3. Najmanji broj spavaćih soba među prikupljenim podacima je 0,
+a najveći 8. Za prikaz ovih podataka odabran je histogram, broj razreda je 25.
 
 ```{r}
 #histogram kreiran korištenjem značajke BedroomAbvGr
 hist(data$BedroomAbvGr,main='Bedroom number histogram',xlab='Number of bedrooms',
      ylab='Frequency', breaks=25)
 ```
-
 \pagebreak
-
 ```{r}
 #prosječan broj spavaćih soba
 mean(data$BedroomAbvGr)
 ```
 
-S obzirom da je najveći broj prodanih nekretnina bio 2009. godine,
-zanima nas prosječni broj spavaćih soba te godine u usporedbi s ostalim
-godinama.
+S obzirom da je najveći broj prodanih nekretnina bio 2009. godine, zanima
+nas prosječni broj spavaćih soba te godine u usporedbi s ostalim godinama.
 
 ```{r, out.height='150%'}
 #grupiranje nekretnina pomoću značajke YrSold
@@ -157,12 +143,10 @@ as.data.frame(t(df)) %>% kable(col.names = NULL)
 ```
 
 \vspace{1em}
-
-Sljedeći dijagram prikazuje distribuciju prodanih nekretnina u ovisnosi
+Sljedeći dijagram prikazuje distribuciju prodanih nekretnina u ovisnosti
 o kvartu u kojem se nalaze. Iz dijagrama je vidljivo da se najveći broj
-prodanih nekretnina nalazi u kvartu North Ames. Za prikaz podataka
-korišten je stupičasti dijagram.
-
+prodanih nekretnina nalazi u kvartu North Ames. Za prikaz podataka korišten 
+je stupičasti dijagram.
 ```{r, out.height='150%'}
 blmngtn = which(data$Neighborhood=='Blmngtn')/1460*100
 blueste = which(data$Neighborhood=='Blueste')/1460*100
@@ -176,27 +160,17 @@ gilbert = which(data$Neighborhood=='Gilbert')/1460*100
 IDOTRR = which(data$Neighborhood=='IDOTRR')/1460*100
 barplot(table(data$Neighborhood),las=2,cex.names=.5,main='Sold houses per neighborhood')
 ```
-
-```{=tex}
 \vspace{1em}
 \linebreak
-```
-Nadalje, mogli bi se zapitati koja je prosječna cijena kvadrata po
-kvartu, kako bi dobili bolji uvid u poželjnije kvartove za život. Na
-temelju stupičastog dijagrama, zaključujemo kako su cijene nekretnina
-najpovoljnije u kvartu South & West of Iowa State University, a
-najskuplje u Stone Brook kvartu.
+Nadalje, mogli bi se zapitati koja je prosječna cijena kvadrata po kvartu, kako bi dobili bolji uvid u poželjnije kvartove za život. Na temelju stupičastog dijagrama, zaključujemo kako su cijene nekretnina najpovoljnije u kvartu South & West of Iowa State University, a najskuplje u Stone Brook kvartu.
 
 ```{r}
 data$PricePerSqFt <- data$SalePrice / data$GrLivArea
 data_by_neighborhood <- data %>% group_by(Neighborhood) %>% 
   summarize(MeanPricePerSqFt = mean(PricePerSqFt))
 
-
-
 ggplot(data_by_neighborhood, aes(x = Neighborhood, y = MeanPricePerSqFt)) + 
   geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90))
-
 
 ```
 
@@ -224,14 +198,11 @@ tableHSLS <- table(data$HouseStyle, data$LotShape)
 chi_squared_test <- chisq.test(tableHSLS,simulate.p.value = T)
 chi_squared_test
 #p_value < 0.05 pa odbacijemo H0 na razini znacajnosti od 5%
-
 colors <- c("red", "blue", "green", "orange")
-
 mosaicplot(tableHSLS,
            col=colors,
            xlab="House Style", ylab = "Lot Shape" ,main = "House Style by Shape of Lot",
            las=1)
-
 ```
 
 ## Ovisnost cijene kvadrata nekretnine o broju spavaćih soba
@@ -242,26 +213,23 @@ je statistički test koji se koristi za usporedbu srednjih vrijednosti
 više od dvije grupe. Često je dobro rješenje kada želimo utvrditi
 postoji li značajna razlika između srednjih vrijednosti više od dvije
 grupe, jer nam omogućuje testiranje više grupa odjednom. Za početak
-potrebno je provjeriti homogenost i normalnost, međutim Bartlletovim
+potrebno je provjeriti homogenost i normalnost, međutim Bartlettovim
 testom utvrđujemo kako uzorak nema homogene varijance, a ni normalnu
 razdiobu po grupama, što je provjereno Lillieforsovom inačicom Kolmogorov-Smirnov
 testa. Stoga ćemo provesti Kruskal-Wallis test za provjeru uvjetuje li
 broj soba cijenu kvadrata. P-vrijednost dobivenog rezultata je manja od
-0.05, pa na razini značajnosti 5% ozbacujemo hipotezi da su PricePerSqFt i BedroomAbvGr
+0.05, pa na razini značajnosti 5% odbacujemo hipotezu da su varijable PricePerSqFt i BedroomAbvGr
 nezavisne, stoga zaključujemo da broj soba uvjetuje cijenu kvadrata.\
-
 
 
 ```{r}
 library(dplyr)   
-
 data$BedroomAbvGr <- as.factor(data$BedroomAbvGr)
-
 data$PricePerSqFt <- as.numeric(data$SalePrice) / as.numeric(data$GrLivArea)
-
-
+```
+```{r}
+#provjera normalnosti
 require(nortest)
-
 lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='0'])
 lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='1'])
 lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='2'])
@@ -269,10 +237,10 @@ lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='3'])
 lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='4'])
 lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='5'])
 lillie.test(data$PricePerSqFt[data$BedroomAbvGr=='6'])
-#Za provjeru normalnosti koristimo Lillieforsovu inačicu KS testa, već nakon provjera za nekretnine s 3 sobe utvrđujemo da pretpotavka normalnosti nije zadovoljena. Iako već sad znamo da ne možemo provesti ANOVA test, provjerit ćemo i homogenost kao u auditornim vježbama.
-#nekretnina sa sedam soba nema, a s osam postoji samo jedna
-
-
+```
+Za provjeru normalnosti koristimo Lillieforsovu inačicu KS testa, već nakon provjera za nekretnine s 3 sobe utvrđujemo da pretpotavka normalnosti nije zadovoljena. Iako već sad znamo da ne možemo provesti ANOVA test, provjerit ćemo i homogenost kao u auditornim vježbama.
+Nekretnina sa sedam soba nema, a s osam postoji samo jedna.
+```{r}
 bartlett.test(
   list(data$PricePerSqFt[data$BedroomAbvGr=='0'],
        data$PricePerSqFt[data$BedroomAbvGr=='1'],
@@ -283,7 +251,6 @@ bartlett.test(
        data$PricePerSqFt[data$BedroomAbvGr=='6']
   )
 )
-
 mean(data$PricePerSqFt[data$BedroomAbvGr=='0'])
 mean(data$PricePerSqFt[data$BedroomAbvGr=='1'])
 mean(data$PricePerSqFt[data$BedroomAbvGr=='2'])
@@ -291,366 +258,255 @@ mean(data$PricePerSqFt[data$BedroomAbvGr=='3'])
 mean(data$PricePerSqFt[data$BedroomAbvGr=='4'])
 mean(data$PricePerSqFt[data$BedroomAbvGr=='5'])
 mean(data$PricePerSqFt[data$BedroomAbvGr=='6'])
-
-#buduci da uzorak nema homogene varijance, probati cemo problem rijesiti s  kruskal-wallis
-#koji to ne pretpostavlja
-
-
-
+```
+Buduci da uzorak nema homogene varijance, probati cemo problem rijesiti s Kruskal-Wallis koji to ne pretpostavlja:
+```{r}
 kruskal.test(data$PricePerSqFt~data$BedroomAbvGr)
-#p vrijednost je manje od 0.05 da odbacujemo hipotezu da ne ovisi o broju soba
-
-
+```
+P vrijednost je manja od 0.05, što znači da odbacujemo hipotezu da cijena po kvadratu ne ovisi o broju soba.
+```{r}
 data_by_bedrooms <- data %>%
   group_by(BedroomAbvGr)%>%
   summarize(mean_price_sqft =mean(SalePrice/GrLivArea),
             sd_price_sqft=sd(SalePrice/GrLivArea))
-
 legenda = c("0 Soba", "1 Soba", "2 Sobe", "3 Sobe", "4 Sobe", "5 Soba", "6 Soba", "8 Soba")
-
-
  ggplot(data = data_by_bedrooms, 
         aes(x = BedroomAbvGr, y = mean_price_sqft,fill = legenda)) + geom_bar(stat = "identity")
 ```
 
 \pagebreak
 
-## Ovisi li velicina podruma o kvartu u gradu
+## Ovisi li veličina podruma o kvartu u gradu
 
 Svaka prodana nekretnina nalazi se u određenom naselju i ima određenu
 veličinu podruma. Zanima nas razlikuju li se uspješnosti prodaje
-nekretnina u određenom naselju s obzirom na veličinu podruma.
+nekretnina u određenom naselju s obzirom na veličinu podruma. Također, ovdje provodimo ANOVA test te provjeravamo njegove početne pretpostavke - normalnost i homogenost podataka.
+
+Prvo utvrđujemo normalnost preko Lillieforsove inačice Kolmogorov-Smirnov testa. U ovom slučaju, razmatramo veličinu podruma (TotalBsmtSF) kao zavisnu veličinu, a kvart (Neighborhood) kao varijablu koja određuje grupe odnosno populacije.
 
 ```{r fig.show="hold", fig.align='center'}
+#H0: Velicina podruma i kvart su nezavisni
+#H1: Velicina podruma ovisi o kvartu
 data_by_neighborhood <- data %>% group_by(data$Neighborhood)
-print(data_by_neighborhood)
-boxplot(data_by_neighborhood$TotalBsmtSF 
-        ~ data_by_neighborhood$Neighborhood,
-        ylab = "TotalBsm",
-        xlab = "Neigh", col=rainbow(3))
+#provjera normalnosti podataka
+require(nortest)
+lillie.test(data_by_neighborhood$TotalBsmtSF)
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Blmngtn"])
+#lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Blueste"])
+#U kvartu Bluestem je premalo podataka stoga je test za normalnost zakomentiran
+#kako ne bi ometao provedbu ostalih testova
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="BrDale"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="BrkSide"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="ClearCr"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="CollgCr"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Crawfor"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Edwards"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Gilbert"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="IDOTRR"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="MeadowV"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Mitchel"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NAmes"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NoRidge"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NPkVill"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NridgHt"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NWAmes"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="OldTown"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="SWISU"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Sawyer"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="SawyerW"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Somerst"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="StoneBr"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Timber"])
+lillie.test(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Veenker"])
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re1 <- data[data$Neighborhood == c("Blmngtn"),]
-hist(data_re1$TotalBsm,
-     main = "Velicina podruma u Blmngtn",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re1$TotalBsmtSF, main="Velicina podruma u Blmngtn")
-qqline(data_re1$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Blmngtn"],
+     main = "Velicina podruma u Bloomington Heights",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re2 <- data[data$Neighborhood == c("Blueste"),]
-hist(data_re2$TotalBsm,
-     main = "Velicina podruma u Blueste",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re2$TotalBsmtSF, main="Velicina podruma u Blueste")
-qqline(data_re2$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Blueste"],
+     main = "Velicina podruma u Bluestem Heights",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re3 <- data[data$Neighborhood == c("BrDale"),]
-hist(data_re3$TotalBsm,
-     main = "Velicina podruma u BrDale",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re3$TotalBsmtSF, main="Velicina podruma u BrDale")
-qqline(data_re3$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="BrDale"],
+     main = "Velicina podruma u Briardale",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re4 <- data[data$Neighborhood == c("BrkSide"),]
-hist(data_re4$TotalBsm,
-     main = "Velicina podruma u BrkSide",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re4$TotalBsmtSF, main="Velicina podruma u BrkSide")
-qqline(data_re4$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="BrkSide"],
+     main = "Velicina podruma u Brookside",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re5 <- data[data$Neighborhood == c("ClearCr"),]
-hist(data_re5$TotalBsm,
-     main = "Velicina podruma u ClearCr",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re5$TotalBsmtSF, main="Velicina podruma u ClearCr")
-qqline(data_re5$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="ClearCr"],
+     main = "Velicina podruma u Clear Creek",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re6 <- data[data$Neighborhood == c("CollgCr"),]
-hist(data_re6$TotalBsm,
-     main = "Velicina podruma u CollgCr",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re6$TotalBsmtSF, main="Velicina podruma u CollgCr")
-qqline(data_re6$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="CollgCr"],
+     main = "Velicina podruma u College Creek",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re7 <- data[data$Neighborhood == c("Crawfor"),]
-hist(data_re7$TotalBsm,
-     main = "Velicina podruma u Crawfor",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re7$TotalBsmtSF, main="Velicina podruma u Crawfor")
-qqline(data_re7$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Crawfor"],
+     main = "Velicina podruma u Crawford",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re8 <- data[data$Neighborhood == c("Edwards"),]
-hist(data_re8$TotalBsm,
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Edwards"],
      main = "Velicina podruma u Edwards",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re8$TotalBsmtSF, main="Velicina podruma u Edwards")
-qqline(data_re8$TotalBsmtS, col="blue")
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re9 <- data[data$Neighborhood == c("Gilbert"),]
-hist(data_re9$TotalBsm,
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Gilbert"],
      main = "Velicina podruma u Gilbert",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re9$TotalBsmtSF, main="Velicina podruma u Gilbert")
-qqline(data_re9$TotalBsmtS, col="blue")
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re10 <- data[data$Neighborhood == c("IDOTRR"),]
-hist(data_re10$TotalBsm,
-     main = "Velicina podruma u IDOTRR",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re10$TotalBsmtSF, main="Velicina podruma u IDOTRR")
-qqline(data_re10$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="IDOTRR"],
+     main = "Velicina podruma u Iowa DOT and Rail Road",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re11 <- data[data$Neighborhood == c("MeadowV"),]
-hist(data_re11$TotalBsm,
-     main = "Velicina podruma u MeadowV",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re11$TotalBsmtSF, main="Velicina podruma u MeadowV")
-qqline(data_re11$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="MeadowV"],
+     main = "Velicina podruma u Meadow Village",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re12 <- data[data$Neighborhood == c("Mitchel"),]
-hist(data_re12$TotalBsm,
-     main = "Velicina podruma u Mitchel",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re12$TotalBsmtSF, main="Velicina podruma u Mitchel")
-qqline(data_re12$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Mitchel"],
+     main = "Velicina podruma u Mitchell",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re13 <- data[data$Neighborhood == c("NAmes"),]
-hist(data_re13$TotalBsm,
-     main = "Velicina podruma u Names",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re13$TotalBsmtSF, main="Velicina podruma u Names")
-qqline(data_re13$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NAmes"],
+     main = "Velicina podruma u North Ames",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re14 <- data[data$Neighborhood == c("NoRidge"),]
-hist(data_re14$TotalBsm,
-     main = "Velicina podruma u NoRidge",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re14$TotalBsmtSF, main="Velicina podruma u NoRidge")
-qqline(data_re14$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NoRidge"],
+     main = "Velicina podruma u Northridge",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re15 <- data[data$Neighborhood == c("NPkVill"),]
-hist(data_re15$TotalBsm,
-     main = "Velicina podruma u NPkVill",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re15$TotalBsmtSF, main="Velicina podruma u NPkVill")
-qqline(data_re15$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NPkVill"],
+     main = "Velicina podruma u Northpark Villa",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re16 <- data[data$Neighborhood == c("NridgHt"),]
-hist(data_re16$TotalBsm,
-     main = "Velicina podruma u NridgHt",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re16$TotalBsmtSF, main="Velicina podruma u NridgHt")
-qqline(data_re16$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NridgHt"],
+     main = "Velicina podruma u Northridge Heights",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re17 <- data[data$Neighborhood == c("NWAmes"),]
-hist(data_re17$TotalBsm,
-     main = "Velicina podruma u NWAmes",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re17$TotalBsmtSF, main="Velicina podruma u NWAmes")
-qqline(data_re17$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NWAmes"],
+     main = "Velicina podruma u Northwest Ames",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re18 <- data[data$Neighborhood == c("OldTown"),]
-hist(data_re18$TotalBsm,
-     main = "Velicina podruma u OldTown",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re18$TotalBsmtSF, main="Velicina podruma u OldTown")
-qqline(data_re18$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="OldTown"],
+     main = "Velicina podruma u Old Town",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re19 <- data[data$Neighborhood == c("SWISU"),]
-hist(data_re19$TotalBsm,
-     main = "Velicina podruma u SWISU",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re19$TotalBsmtSF, main="Velicina podruma u SWISU")
-qqline(data_re19$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="SWISU"],
+     main = "Velicina podruma u South & West of Iowa State University",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re20 <- data[data$Neighborhood == c("Sawyer"),]
-hist(data_re20$TotalBsm,
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Sawyer"],
      main = "Velicina podruma u Sawyer",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re20$TotalBsmtSF, main="Velicina podruma u Sawyer")
-qqline(data_re20$TotalBsmtS, col="blue")
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re21 <- data[data$Neighborhood == c("SawyerW"),]
-hist(data_re21$TotalBsm,
-     main = "Velicina podruma u SawyerW",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re21$TotalBsmtSF, main="Velicina podruma u SawyerW")
-qqline(data_re21$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="SawyerW"],
+     main = "Velicina podruma u Sawyer West",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re22 <- data[data$Neighborhood == c("Somerst"),]
-hist(data_re22$TotalBsm,
-     main = "Velicina podruma u Somerst",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re22$TotalBsmtSF, main="Velicina podruma u Somerst")
-qqline(data_re22$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Somerst"],
+     main = "Velicina podruma u Somerset",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re23 <- data[data$Neighborhood == c("StoneBr"),]
-hist(data_re23$TotalBsm,
-     main = "Velicina podruma u StoneBr",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re23$TotalBsmtSF, main="Velicina podruma u StoneBr")
-qqline(data_re23$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="StoneBr"],
+     main = "Velicina podruma u Stone Brook",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re24 <- data[data$Neighborhood == c("Timber"),]
-hist(data_re24$TotalBsm,
-     main = "Velicina podruma u Timber",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re24$TotalBsmtSF, main="Velicina podruma u Timber")
-qqline(data_re24$TotalBsmtS, col="blue")
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Timber"],
+     main = "Velicina podruma u Timberland",
+     xlab = "Total square feet of basement area")
 ```
-
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-data_re25 <- data[data$Neighborhood == c("Veenker"),]
-hist(data_re25$TotalBsm,
+hist(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Veenker"],
      main = "Velicina podruma u Veenker",
-     col="purple", xlab="vel podruma")
-qqnorm(data_re25$TotalBsmtSF, main="Velicina podruma u Veenker")
-qqline(data_re25$TotalBsmtS, col="blue")
-
+     xlab = "Total square feet of basement area")
 ```
+\linebreak
+Za kvart Bluestem ne postoji dovoljno zapisa (ima ih samo 2) da se provjeri normalnost poadataka. Vidimo da Lillieforsova inačica KS testa govori da podaci uglavnom ne dolaze iz normalne distribucije, no ukoliko pogledamo histograme vidimo (kada izuzmemo stršeće vrijednosti) distribucije nalik normalnoj. ANOVA je relativno robusna metoda na blaga odstupanja od pretpostavke normalnosti kada su veličine grupa podjednake, stoga nastavljamo dalje s provjerom pretpostavke homogenosti podataka. 
 
-Pretpostavke ANOVA testa su: populacije iz grupa međusobno su nezavisne
-i normalno distribuirane sa jednakim varijancama. Nezavisnost populacija
-teško možemo provjeriti stoga ćemo pretpostaviti da su one nezavisne.
-
-U nastavku vidimo da se varijance populacija razlikuju.
+Što se tiče homogenosti varijanci različitih populacija, potrebno je testirati:
+$$ \begin{aligned}
+  H_0 & : \sigma_1^2 = \sigma_2^2 = \ldots = \sigma_k^2 \\
+  H_1 & : \text{barem dvije varijance nisu iste}.
+\end{aligned} $$
+Navedenu hipotezu ćemo testirati Bartlettovim testom.
+```{r out.width=c('50%', '50%'), fig.show="hold"}
+bartlett.test(data_by_neighborhood$TotalBsmtSF ~ data_by_neighborhood$Neighborhood)
+```
 
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-var(na.omit(data_re1$TotalBsmtSF))
-var(na.omit(data_re2$TotalBsmtSF))
-var(na.omit(data_re3$TotalBsmtSF))
-var(na.omit(data_re4$TotalBsmtSF))
-var(na.omit(data_re5$TotalBsmtSF))
-var(na.omit(data_re6$TotalBsmtSF))
-var(na.omit(data_re7$TotalBsmtSF))
-var(na.omit(data_re8$TotalBsmtSF))
-var(na.omit(data_re9$TotalBsmtSF))
-var(na.omit(data_re10$TotalBsmtSF))
-var(na.omit(data_re11$TotalBsmtSF))
-var(na.omit(data_re12$TotalBsmtSF))
-var(na.omit(data_re13$TotalBsmtSF))
-var(na.omit(data_re14$TotalBsmtSF))
-var(na.omit(data_re15$TotalBsmtSF))
-var(na.omit(data_re16$TotalBsmtSF))
-var(na.omit(data_re17$TotalBsmtSF))
-var(na.omit(data_re18$TotalBsmtSF))
-var(na.omit(data_re19$TotalBsmtSF))
-var(na.omit(data_re20$TotalBsmtSF))
-var(na.omit(data_re21$TotalBsmtSF))
-var(na.omit(data_re22$TotalBsmtSF))
-var(na.omit(data_re23$TotalBsmtSF))
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Blmngtn"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Blueste"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="BrDale"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="BrkSide"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="ClearCr"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="CollgCr"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Crawfor"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Edwards"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Gilbert"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="IDOTRR"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="MeadowV"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Mitchel"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NAmes"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NoRidge"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NPkVill"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NridgHt"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="NWAmes"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="OldTown"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="SWISU"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Sawyer"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="SawyerW"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Somerst"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="StoneBr"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Timber"])
+var(data_by_neighborhood$TotalBsmtSF[data_by_neighborhood$Neighborhood=="Veenker"])
+
 ```
 
-U nastavku je prikazan pravokutni dijagram za sve grupe.
+Provjeravamo zatim postoje li razlike u veličinama podruma za različite kvartove u Amesu.
 
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
 boxplot(data$TotalBsmtSF[data$Neighborhood != "<undefined>"] 
         ~ data$Neighborhood[data$Neighborhood != "<undefined>"],
-        ylab= "Total Besment",
+        ylab= "Total Square Feet of Basement Area",
         xlab= "Neighbourhood",
         col=rainbow(3))
 ```
-
-Pretpostavljamo da su sredine svih grupa jednake te uz gore navedene
-pretpostavke provodimo ANOVA test o jednakosti sredina. Nulta hipoteza
-je da su sredine za sve grupe jednake, a alternativna hipoteza je da se
-razlikuju.
-
+\linebreak
+Grafički prikaz pokazuje kako postoji jasna razlika između kvartova u veličinama podruma. Provedimo sada ANOVA test kako bismo potvrdili tu razliku:
 ```{r out.width=c('50%', '50%'), fig.show="hold"}
-res.aov <- aov( TotalBsmtSF~ factor(data$Neighborhood), data = data)
+res.aov <- aov(data_by_neighborhood$TotalBsmtSF ~ data_by_neighborhood$Neighborhood)
 summary(res.aov)
+kruskal.test(data_by_neighborhood$TotalBsmtSF ~ data_by_neighborhood$Neighborhood)
 ```
 
-Iz rezultata ANOVA testa možemo zaključiti da sredine tih uzoraka nisu
-jednake te odbaciti nultu hipotezu u korist tvrdnje da su sredine
-različite. ANOVA nam samo govori da su sredine tih kategorija međusobno
-različite.
+P- vrijednost prilikom provođenja ANOVA testa (i Kruskal-Wallis testa kao dodatna potvrda koja ne pretpostavlja homogenost i normalnost) manja je od 0.01, stoga na razini značajnosti 1% odbacujemo hipotezu da su veličina podruma i kvart u gradu nezavisni. 
 
-## Ovisnost cijene o veličini nekretnine:
-
-Provjeravamo linearnu zavisnost veličine nekretnine i cijene. Intuitivno
-bi se dalo naslutiti da će veće nekretnine imati veću cijenu.
-
-```{r}
-
-nekretnine.data = data[,c("GrLivArea","SalePrice")]
-colnames(nekretnine.data) = c("velicina", "cijena")
-nekretnine.data = na.omit(nekretnine.data)
-
-log_velicina = log(nekretnine.data$velicina)
-
-plot(log(nekretnine.data$velicina), nekretnine.data$cijena)
-
-fit.velicine = lm(nekretnine.data$cijena~log_velicina)
-
-abline(fit.velicine)
-
-summary(fit.velicine)
-
-c("Pearson", cor(log_velicina, nekretnine.data$cijena, method = "pearson",
-                 use = "complete.obs"))
-
-```
-
-Prema Pearsonovom koeficijentu, vidimo da su varijable zavisne što je
-bilo i za očekivati.
-
-U nastavku prikazujemo Q-Q plot i graf reziduala
-
-```{r}
-qqnorm(rstandard(fit.velicine))
-qqline(rstandard(fit.velicine))
-plot(fitted(fit.velicine), resid(fit.velicine))
-shapiro.test(data$GrLivArea)#odbacujemo nultu hipotezu da su podaci normalni
-shapiro.test(data$SalePrice)#odbacujemo nultu hipotezu da su podaci normalni
-```
+\pagebreak
+## Predviđanje cijene nekretnine
 
 Kako bi znali predvidjeti cijenu nekretnine, možemo ispitati različite
 varijable koje bi mogle utjecati na cijenu:
@@ -677,9 +533,7 @@ linear_graph <- function(){
   model <- lm(SalePrice~TotRmsAbvGrd,data=data)
   abline(model, col="tomato")
 }
-
 linear_graph()
-
 ```
 
 Očito je da kvadratura (i godina izgradnje i broj soba) ima izražen (i
@@ -694,22 +548,24 @@ zavisne i nezavisne varijable, odnosno data.frame sa svim varijablama i
 definiciju varijabli u modelu.
 
 ```{r jednostavna regresija}
-
-fit.kvadratura = lm(data$SalePrice~data$GrLivArea,data=data) #linearni model cijene nekretnina (SalePrice) i kvadratura nekretnine (GrLivArea)
-
-fit.godinaIzgradnje = lm(data$SalePrice~data$YearBuilt,data=data) #linearni model cijene nekretnina (SalePrice) i godinu izgradnje nekretnine (YearBuilt)
-
-fit.brojSoba = lm(data$SalePrice~data$TotRmsAbvGrd,data=data) #linearni model cijene nekretnina (SalePrice) i broj soba u nekretnin (TotRmsAbvGrd)
-
-plot(data$GrLivArea,data$SalePrice) #graficki prikaz podataka
-lines(data$GrLivArea,fit.kvadratura$fitted.values,col='red') #graficki prikaz procijenjenih vrijednosti iz modela
-
-plot(data$YearBuilt,data$SalePrice) #graficki prikaz podataka
-lines(data$YearBuilt,fit.godinaIzgradnje$fitted.values,col='red') #graficki prikaz procijenjenih vrijednosti iz modela
-
-plot(data$TotRmsAbvGrd,data$SalePrice) #graficki prikaz podataka
-lines(data$TotRmsAbvGrd,fit.brojSoba$fitted.values,col='red') #graficki prikaz procijenjenih vrijednosti iz modela
-
+#linearni model cijene nekretnina (SalePrice) i kvadratura nekretnine (GrLivArea)
+fit.kvadratura = lm(data$SalePrice~data$GrLivArea,data=data)
+#linearni model cijene nekretnina (SalePrice) i godinu izgradnje nekretnine (YearBuilt)
+fit.godinaIzgradnje = lm(data$SalePrice~data$YearBuilt,data=data) 
+#linearni model cijene nekretnina (SalePrice) i broj soba u nekretnin (TotRmsAbvGrd)
+fit.brojSoba = lm(data$SalePrice~data$TotRmsAbvGrd,data=data) 
+#graficki prikaz podataka
+plot(data$GrLivArea,data$SalePrice) 
+#graficki prikaz procijenjenih vrijednosti iz modela
+lines(data$GrLivArea,fit.kvadratura$fitted.values,col='red') 
+#graficki prikaz podataka
+plot(data$YearBuilt,data$SalePrice) 
+#graficki prikaz procijenjenih vrijednosti iz modela
+lines(data$YearBuilt,fit.godinaIzgradnje$fitted.values,col='red') 
+#graficki prikaz podataka
+plot(data$TotRmsAbvGrd,data$SalePrice)
+#graficki prikaz procijenjenih vrijednosti iz modela
+lines(data$TotRmsAbvGrd,fit.brojSoba$fitted.values,col='red') 
 ```
 
 Nagibi pravaca linearne regresije potvrđuju tvrdnje o efektima pojedinih
@@ -727,30 +583,25 @@ kvantil-kvantil plota (usporedbom s linijom normalne razdiobe), te
 statistički pomoću Anderson-Darlingovog testa.
 
 ```{r res}
-
 selected.model = fit.kvadratura
-
 plot(selected.model$residuals) #gledajuci reziduale na ovaj nacin tesko je suditi o normalnosti
-
 #histogram je vrlo interpretativan
 hist((selected.model$residuals))
 hist(rstandard(selected.model))
-
 #q-q plot reziduala s linijom normalne distribucije
 qqnorm(rstandard(selected.model))
 qqline(rstandard(selected.model))
-
-plot(selected.model$fitted.values,selected.model$residuals) #reziduale je dobro prikazati u ovisnosti o procjenama modela
-
-plot(data$SalePrice,selected.model$residuals) #a ponekad i u ovisnosti o nekim drugim varijablama koje je mozda tesko modelirati kao nezavisne varijable s linearnim efektom na izlaz
-
+plot(selected.model$fitted.values,selected.model$residuals)
+#reziduale je dobro prikazati u ovisnosti o procjenama modela
+plot(data$SalePrice,selected.model$residuals) 
+#a ponekad i u ovisnosti o nekim drugim varijablama koje je mozda
+#tesko modelirati kao nezavisne varijable s linearnim efektom na izlaz
 #AD test na normalnost 
-#ad.test(rstandard(fit.kvadratura))
+ad.test(rstandard(fit.kvadratura))
 #KS test should only contain unique values
-#ks.test(rstandard(fit.kvadratura),'pnorm')
+ks.test(rstandard(fit.kvadratura),'pnorm')
 require(nortest)
 lillie.test(rstandard(fit.kvadratura))
-
 ```
 
 Grafički prikaz reziduala samo po indeksu po kojem su dani u podatcima
@@ -772,11 +623,10 @@ Takve vremenske zavisnosti se najčešće modeliraju tzv. autoregresivnim
 modelima (ARMA, ARIMA, ARIMAX, itd.).
 
 ```{r analiza procijenjenih modela}
-
 summary(fit.kvadratura)
-
 summary(fit.godinaIzgradnje)
-
 summary(fit.brojSoba)
-
 ```
+
+## Zaključak
+U gradu Amesu, mnogo varijabli vezanih uz prodane nekretnine u periodu od 2006. do 2010. godine su međusobno zavisne. Tako smo u ovom radu pokazali kako je broj katova nekretnine određen oblikom zemljišne čestice na kojoj se nalazi. Tu zavisnost dokazali smo $\chi^2$ testom. Zatim smo korištenjem ANOVA testa saznali kako veličina podruma nekretnine ovisi o kvartu u kojem se nalazi, te kako cijena kvadrata nekretnine ovisi o broju spavaćih soba u njoj. Za kraj, linearnom regresijom pokazali smo kako se cijene nekretnine može predvidjeti ako se pogledaju značajke kvadrature, godine izgradnje te broja spavaćih soba.
