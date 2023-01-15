@@ -745,8 +745,9 @@ plot(selected.model$fitted.values,selected.model$residuals) #reziduale je dobro 
 plot(data$SalePrice,selected.model$residuals) #a ponekad i u ovisnosti o nekim drugim varijablama koje je mozda tesko modelirati kao nezavisne varijable s linearnim efektom na izlaz
 
 #AD test na normalnost 
-ad.test(rstandard(fit.kvadratura))
-
+#ad.test(rstandard(fit.kvadratura))
+#KS test should only contain unique values
+#ks.test(rstandard(fit.kvadratura),'pnorm')
 require(nortest)
 lillie.test(rstandard(fit.kvadratura))
 
